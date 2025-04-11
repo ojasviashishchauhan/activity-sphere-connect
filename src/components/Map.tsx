@@ -7,10 +7,11 @@ import { Activity, Location } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { MapPin, Search, Navigation, Plus, Minus } from 'lucide-react';
 
-// Temporary public token - in production, use environment variables
-mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M29iazA2Z2gycXA4N2pmbDZmangifQ.-g_vE53SD2WrJ6tFX7QHmA';
+// We'll use user-provided token or default to empty string
+let mapboxToken = '';
 
 const Map: React.FC = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -20,6 +21,9 @@ const Map: React.FC = () => {
   
   const [addressInput, setAddressInput] = useState('');
   const [isMapLoaded, setIsMapLoaded] = useState(false);
+  const [showTokenDialog, setShowTokenDialog] = useState(true);
+  const [tokenInput, setTokenInput] = useState('');
+  const [mapError, setMapError] = useState<string | null>(null);
   
   const {
     filteredActivities,
@@ -31,64 +35,88 @@ const Map: React.FC = () => {
     updateMapConfig,
   } = useActivity();
 
-  // Initialize map
-  useEffect(() => {
+  // Initialize map after token is provided
+  const initializeMap = () => {
     if (!mapContainer.current || map.current) return;
     
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/streets-v11',
-      center: mapConfig.center,
-      zoom: mapConfig.zoom,
-    });
+    // Set the mapbox token
+    mapboxgl.accessToken = mapboxToken;
     
-    map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
-    
-    map.current.on('load', () => {
-      setIsMapLoaded(true);
+    try {
+      map.current = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: 'mapbox://styles/mapbox/streets-v11',
+        center: mapConfig.center,
+        zoom: mapConfig.zoom,
+      });
       
-      if (map.current) {
-        // Add user location circle (radius)
-        map.current.addSource('radius-circle', {
-          type: 'geojson',
-          data: {
-            type: 'Feature',
-            geometry: {
-              type: 'Point',
-              coordinates: mapConfig.center,
-            },
-            properties: {},
-          },
-        });
+      map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+      
+      map.current.on('load', () => {
+        setIsMapLoaded(true);
+        setMapError(null);
         
-        map.current.addLayer({
-          id: 'radius-circle-fill',
-          type: 'circle',
-          source: 'radius-circle',
-          paint: {
-            'circle-radius': {
-              stops: [
-                [0, 0],
-                [20, 1000000], // Scale the radius based on zoom level
-              ],
-              base: 2,
+        if (map.current) {
+          // Add user location circle (radius)
+          map.current.addSource('radius-circle', {
+            type: 'geojson',
+            data: {
+              type: 'Feature',
+              geometry: {
+                type: 'Point',
+                coordinates: mapConfig.center,
+              },
+              properties: {},
             },
-            'circle-color': '#3B82F6',
-            'circle-opacity': 0.1,
-            'circle-stroke-width': 1,
-            'circle-stroke-color': '#3B82F6',
-          },
-        });
-      }
-    });
-    
-    return () => {
+          });
+          
+          map.current.addLayer({
+            id: 'radius-circle-fill',
+            type: 'circle',
+            source: 'radius-circle',
+            paint: {
+              'circle-radius': {
+                stops: [
+                  [0, 0],
+                  [20, 1000000], // Scale the radius based on zoom level
+                ],
+                base: 2,
+              },
+              'circle-color': '#3B82F6',
+              'circle-opacity': 0.1,
+              'circle-stroke-width': 1,
+              'circle-stroke-color': '#3B82F6',
+            },
+          });
+        }
+      });
+
+      map.current.on('error', (e) => {
+        setMapError(e.error.message || 'Error loading map');
+        console.error('Map error:', e);
+      });
+    } catch (error) {
+      console.error('Error initializing map:', error);
+      setMapError('Error initializing map. Please check your token.');
+    }
+  };
+
+  // Handle token submission
+  const handleTokenSubmit = () => {
+    if (tokenInput.trim()) {
+      mapboxToken = tokenInput.trim();
+      
+      // Clean up existing map if any
       if (map.current) {
         map.current.remove();
         map.current = null;
       }
-    };
-  }, [mapConfig.center, mapConfig.zoom]);
+      
+      // Initialize new map with token
+      initializeMap();
+      setShowTokenDialog(false);
+    }
+  };
 
   // Update user location and radius circle
   useEffect(() => {
@@ -204,9 +232,9 @@ const Map: React.FC = () => {
   // Handle address search
   const handleAddressSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!addressInput.trim()) return;
+    if (!addressInput.trim() || !mapboxToken) return;
     
-    fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(addressInput)}.json?access_token=${mapboxgl.accessToken}&limit=1`)
+    fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(addressInput)}.json?access_token=${mapboxToken}&limit=1`)
       .then(response => response.json())
       .then(data => {
         if (data.features?.length > 0) {
@@ -253,6 +281,45 @@ const Map: React.FC = () => {
 
   return (
     <div className="relative w-full h-full min-h-[500px]">
+      <Dialog open={showTokenDialog} onOpenChange={setShowTokenDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Enter your Mapbox Access Token</DialogTitle>
+            <DialogDescription>
+              To use the map functionality, you need to provide a Mapbox access token. 
+              Visit <a href="https://mapbox.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">Mapbox.com</a>, 
+              create an account, and get your public token from the dashboard.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Input
+              type="text"
+              placeholder="Enter your Mapbox token here"
+              value={tokenInput}
+              onChange={(e) => setTokenInput(e.target.value)}
+              className="w-full"
+            />
+          </div>
+          <DialogFooter>
+            <Button onClick={handleTokenSubmit} disabled={!tokenInput.trim()}>
+              Apply Token
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {mapError && (
+        <div className="absolute inset-0 flex items-center justify-center z-10">
+          <div className="bg-white/90 backdrop-blur-sm p-4 rounded-lg shadow-lg text-center max-w-md">
+            <p className="text-red-500 mb-2">{mapError}</p>
+            <p className="mb-4">Please check your Mapbox token and try again.</p>
+            <Button onClick={() => setShowTokenDialog(true)}>
+              Enter New Token
+            </Button>
+          </div>
+        </div>
+      )}
+
       <div className="absolute top-4 left-4 z-10 w-full max-w-md">
         <form onSubmit={handleAddressSearch} className="flex space-x-2">
           <div className="relative flex-grow">
@@ -287,6 +354,9 @@ const Map: React.FC = () => {
       </div>
       
       <div className="absolute bottom-4 right-4 z-10 flex flex-col space-y-2">
+        <Button type="button" variant="outline" size="icon" onClick={() => setShowTokenDialog(true)} className="bg-white/90 backdrop-blur-sm">
+          <MapPin className="w-4 h-4" />
+        </Button>
         <Button variant="outline" size="icon" onClick={handleZoomIn} className="bg-white/90 backdrop-blur-sm">
           <Plus className="w-4 h-4" />
         </Button>
