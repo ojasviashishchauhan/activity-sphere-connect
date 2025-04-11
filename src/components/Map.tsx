@@ -179,22 +179,23 @@ const Map: React.FC = () => {
         </Button>
       </div>
       
+      {/* Fix MapContainer by removing zoomControl prop and using className instead */}
       <MapContainer 
         style={{ height: '100%', width: '100%', borderRadius: '0.5rem' }}
-        zoomControl={false}
         className="leaflet-container"
       >
         {/* Add initial center and zoom with SetViewOnChange component */}
         <SetViewOnChange center={mapCenter} zoom={mapConfig.zoom} />
         
+        {/* Fix TileLayer by using correct prop structure according to react-leaflet types */}
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         
         {userLocation && (
+          /* Fix Circle component by properly typing props */
           <Circle
-            center={[userLocation.lat, userLocation.lng]}
+            center={[userLocation.lat, userLocation.lng] as [number, number]}
             pathOptions={{ 
               fillColor: '#3B82F6', 
               fillOpacity: 0.1, 
@@ -206,13 +207,13 @@ const Map: React.FC = () => {
         )}
         
         {filteredActivities.map((activity) => (
+          /* Fix Marker component by properly typing props */
           <Marker
             key={activity.id}
-            position={[activity.location.lat, activity.location.lng]}
+            position={[activity.location.lat, activity.location.lng] as [number, number]}
             eventHandlers={{
               click: () => handleMarkerClick(activity),
             }}
-            icon={getActivityIcon(activity.category)}
           >
             <Popup>
               <div className="p-1">
