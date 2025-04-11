@@ -7,7 +7,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { 
   Search, 
   Dumbbell, 
-  PaintBrush, 
+  Paintbrush, 
   GraduationCap, 
   Users, 
   Mountain, 
@@ -59,7 +59,7 @@ const ActivityFilters: React.FC = () => {
             <span>Sports</span>
           </ToggleGroupItem>
           <ToggleGroupItem value="arts" aria-label="Arts category" className="flex items-center gap-1">
-            <PaintBrush className="w-3 h-3" />
+            <Paintbrush className="w-3 h-3" />
             <span>Arts</span>
           </ToggleGroupItem>
           <ToggleGroupItem value="education" aria-label="Education category" className="flex items-center gap-1">

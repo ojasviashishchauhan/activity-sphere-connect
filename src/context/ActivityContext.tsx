@@ -163,7 +163,7 @@ export const ActivityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       prev.map(activity => {
         if (activity.id === activityId) {
           const updatedRequests = (activity.requests || []).map(request => 
-            request.id === requestId ? { ...request, status: 'approved' } : request
+            request.id === requestId ? { ...request, status: 'approved' as const } : request
           );
           
           return { 
@@ -187,7 +187,7 @@ export const ActivityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       prev.map(activity => {
         if (activity.id === activityId) {
           const updatedRequests = (activity.requests || []).map(request => 
-            request.id === requestId ? { ...request, status: 'rejected' } : request
+            request.id === requestId ? { ...request, status: 'rejected' as const } : request
           );
           
           return { ...activity, requests: updatedRequests };
