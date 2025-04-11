@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
@@ -8,15 +7,11 @@ import { Activity, Location } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
-import { Search, Navigation, Plus, Minus, MapPin } from 'lucide-react';
-
-// Fix for Leaflet marker icons
-import icon from 'leaflet/dist/images/marker-icon.png';
-import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+import { Search, Navigation, MapPin } from 'lucide-react';
 
 let DefaultIcon = L.icon({
-  iconUrl: icon,
-  shadowUrl: iconShadow,
+  iconUrl: 'leaflet/dist/images/marker-icon.png',
+  shadowUrl: 'leaflet/dist/images/marker-shadow.png',
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
@@ -24,7 +19,6 @@ let DefaultIcon = L.icon({
 
 L.Marker.prototype.options.icon = DefaultIcon;
 
-// Control component to update view when center changes
 const SetViewOnChange = ({ center, zoom }: { center: [number, number], zoom: number }) => {
   const map = useMap();
   
@@ -49,11 +43,9 @@ const Map: React.FC = () => {
     updateMapConfig,
   } = useActivity();
 
-  // Default center (San Francisco)
   const defaultCenter: [number, number] = [37.7749, -122.4194];
   const mapCenter: [number, number] = userLocation ? [userLocation.lat, userLocation.lng] : defaultCenter;
   
-  // Get user location
   const getUserLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -73,13 +65,11 @@ const Map: React.FC = () => {
     }
   };
 
-  // Handle address search
   const handleAddressSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!addressInput.trim()) return;
     
     try {
-      // Using Nominatim API for geocoding (OpenStreetMap's geocoder)
       const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addressInput)}&limit=1`);
       const data = await response.json();
       
@@ -100,21 +90,19 @@ const Map: React.FC = () => {
     }
   };
 
-  // Update radius
   const handleRadiusChange = (value: number[]) => {
     updateMapConfig({ radius: value[0] });
   };
 
-  // Custom activity marker icon based on category
   const getActivityIcon = (category: string) => {
     const categoryColors: Record<string, string> = {
-      'sports': '#FF5733', // Red-Orange
-      'art': '#33FFA8', // Mint Green
-      'music': '#3380FF', // Blue
-      'outdoor': '#E033FF', // Purple
-      'food': '#FFD700', // Gold
-      'education': '#40E0D0', // Turquoise
-      'other': '#808080', // Gray
+      'sports': '#FF5733',
+      'art': '#33FFA8',
+      'music': '#3380FF',
+      'outdoor': '#E033FF',
+      'food': '#FFD700',
+      'education': '#40E0D0',
+      'other': '#808080',
     };
     
     const color = categoryColors[category] || '#3B82F6';
@@ -128,19 +116,17 @@ const Map: React.FC = () => {
     });
   };
   
-  // Handle activity marker click
   const handleMarkerClick = (activity: Activity) => {
     selectActivity(activity);
   };
 
   useEffect(() => {
-    // Set map as loaded
     setMapLoaded(true);
   }, []);
 
   return (
     <div className="relative w-full h-full min-h-[500px]">
-      <div className="absolute top-4 left-4 z-10 w-full max-w-md">
+      <div className="absolute top-4 left-4 z-[1000] w-full max-w-md">
         <form onSubmit={handleAddressSearch} className="flex space-x-2">
           <div className="relative flex-grow">
             <Input
@@ -159,7 +145,7 @@ const Map: React.FC = () => {
         </form>
         
         {userLocation && (
-          <div className="mt-4 p-4 bg-white/90 backdrop-blur-sm rounded-lg shadow">
+          <div className="mt-4 p-4 bg-white/90 backdrop-blur-sm rounded-lg shadow z-[1000]">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium">Search Radius: {mapConfig.radius} km</span>
             </div>
@@ -173,27 +159,23 @@ const Map: React.FC = () => {
         )}
       </div>
       
-      <div className="absolute bottom-4 right-4 z-10 flex flex-col space-y-2">
+      <div className="absolute bottom-4 right-4 z-[1000] flex flex-col space-y-2">
         <Button variant="outline" size="icon" onClick={getUserLocation} className="bg-white/90 backdrop-blur-sm">
           <MapPin className="w-4 h-4" />
         </Button>
       </div>
       
-      {/* Fix MapContainer by removing zoomControl prop and using className instead */}
       <MapContainer 
-        style={{ height: '100%', width: '100%', borderRadius: '0.5rem' }}
+        style={{ height: '100%', width: '100%', borderRadius: '0.5rem', position: 'absolute', top: 0, left: 0, zIndex: 1 }}
         className="leaflet-container"
       >
-        {/* Add initial center and zoom with SetViewOnChange component */}
         <SetViewOnChange center={mapCenter} zoom={mapConfig.zoom} />
         
-        {/* Fix TileLayer by using correct prop structure according to react-leaflet types */}
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         
         {userLocation && (
-          /* Fix Circle component by properly typing props */
           <Circle
             center={[userLocation.lat, userLocation.lng] as [number, number]}
             pathOptions={{ 
@@ -202,12 +184,11 @@ const Map: React.FC = () => {
               color: '#3B82F6', 
               weight: 1 
             }}
-            radius={mapConfig.radius * 1000} // Convert km to meters
+            radius={mapConfig.radius * 1000}
           />
         )}
         
         {filteredActivities.map((activity) => (
-          /* Fix Marker component by properly typing props */
           <Marker
             key={activity.id}
             position={[activity.location.lat, activity.location.lng] as [number, number]}
