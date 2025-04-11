@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
@@ -8,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
 import { Search, Navigation, MapPin } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 let DefaultIcon = L.icon({
   iconUrl: 'leaflet/dist/images/marker-icon.png',
@@ -126,37 +128,47 @@ const Map: React.FC = () => {
 
   return (
     <div className="relative w-full h-full min-h-[500px]">
-      <div className="absolute top-4 left-4 z-[1000] w-full max-w-md">
-        <form onSubmit={handleAddressSearch} className="flex space-x-2">
-          <div className="relative flex-grow">
-            <Input
-              type="text"
-              placeholder="Search for a location"
-              value={addressInput}
-              onChange={e => setAddressInput(e.target.value)}
-              className="w-full pl-10 bg-white/90 backdrop-blur-sm"
-            />
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-4 h-4" />
-          </div>
-          <Button type="submit" variant="default">Search</Button>
-          <Button type="button" variant="outline" onClick={getUserLocation}>
-            <Navigation className="w-4 h-4" />
-          </Button>
-        </form>
-        
-        {userLocation && (
-          <div className="mt-4 p-4 bg-white/90 backdrop-blur-sm rounded-lg shadow z-[1000]">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium">Search Radius: {mapConfig.radius} km</span>
+      <div className="absolute top-4 left-4 right-4 z-[1000] flex flex-col space-y-2">
+        <div className="flex items-center justify-between">
+          <form onSubmit={handleAddressSearch} className="flex-1 flex space-x-2">
+            <div className="relative flex-grow">
+              <Input
+                type="text"
+                placeholder="Search for a location"
+                value={addressInput}
+                onChange={e => setAddressInput(e.target.value)}
+                className="w-full pl-10 bg-white/90 backdrop-blur-sm"
+              />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-4 h-4" />
             </div>
-            <Slider
-              defaultValue={[mapConfig.radius]}
-              max={50}
-              step={1}
-              onValueChange={handleRadiusChange}
-            />
-          </div>
-        )}
+            <Button type="submit" variant="default">Search</Button>
+            <Button type="button" variant="outline" onClick={getUserLocation}>
+              <Navigation className="w-4 h-4" />
+            </Button>
+          </form>
+          
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" className="ml-2 bg-white/80 hover:bg-white/90">
+                <span className="font-medium">{mapConfig.radius} km</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[200px] p-4">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Search Radius</span>
+                  <span className="text-sm font-medium">{mapConfig.radius} km</span>
+                </div>
+                <Slider
+                  defaultValue={[mapConfig.radius]}
+                  max={50}
+                  step={1}
+                  onValueChange={handleRadiusChange}
+                />
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
       </div>
       
       <div className="absolute bottom-4 right-4 z-[1000] flex flex-col space-y-2">
@@ -178,24 +190,21 @@ const Map: React.FC = () => {
           
           {userLocation && (
             <Circle
-              center={[userLocation.lat, userLocation.lng] as [number, number]}
+              center={[userLocation.lat, userLocation.lng]}
               pathOptions={{ 
                 fillColor: '#3B82F6', 
                 fillOpacity: 0.1, 
                 color: '#3B82F6', 
                 weight: 1 
               }}
-              radius={mapConfig.radius * 1000 as any}
+              radius={mapConfig.radius * 1000}
             />
           )}
           
           {filteredActivities.map((activity) => (
             <Marker
               key={activity.id}
-              position={[activity.location.lat, activity.location.lng] as [number, number]}
-              eventHandlers={{
-                click: () => handleMarkerClick(activity),
-              }}
+              position={[activity.location.lat, activity.location.lng]}
             >
               <Popup>
                 <div className="p-1">
