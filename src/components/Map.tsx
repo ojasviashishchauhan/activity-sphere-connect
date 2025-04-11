@@ -180,28 +180,28 @@ const Map: React.FC = () => {
       </div>
       
       <MapContainer 
-        center={mapCenter} 
-        zoom={mapConfig.zoom}
         style={{ height: '100%', width: '100%', borderRadius: '0.5rem' }}
         zoomControl={false}
+        className="leaflet-container"
       >
+        {/* Add initial center and zoom with SetViewOnChange component */}
+        <SetViewOnChange center={mapCenter} zoom={mapConfig.zoom} />
+        
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         
-        <SetViewOnChange center={mapCenter} zoom={mapConfig.zoom} />
-        
         {userLocation && (
           <Circle
             center={[userLocation.lat, userLocation.lng]}
-            radius={mapConfig.radius * 1000} // Convert km to meters
             pathOptions={{ 
               fillColor: '#3B82F6', 
               fillOpacity: 0.1, 
               color: '#3B82F6', 
               weight: 1 
             }}
+            radius={mapConfig.radius * 1000} // Convert km to meters
           />
         )}
         
@@ -209,10 +209,10 @@ const Map: React.FC = () => {
           <Marker
             key={activity.id}
             position={[activity.location.lat, activity.location.lng]}
-            icon={getActivityIcon(activity.category)}
             eventHandlers={{
               click: () => handleMarkerClick(activity),
             }}
+            icon={getActivityIcon(activity.category)}
           >
             <Popup>
               <div className="p-1">
