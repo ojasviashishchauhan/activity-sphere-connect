@@ -165,46 +165,48 @@ const Map: React.FC = () => {
         </Button>
       </div>
       
-      <MapContainer 
-        style={{ height: '100%', width: '100%', borderRadius: '0.5rem', position: 'absolute', top: 0, left: 0, zIndex: 1 }}
-        className="leaflet-container"
-      >
-        <SetViewOnChange center={mapCenter} zoom={mapConfig.zoom} />
-        
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        
-        {userLocation && (
-          <Circle
-            center={[userLocation.lat, userLocation.lng] as [number, number]}
-            pathOptions={{ 
-              fillColor: '#3B82F6', 
-              fillOpacity: 0.1, 
-              color: '#3B82F6', 
-              weight: 1 
-            }}
-            radius={mapConfig.radius * 1000}
+      <div className="absolute inset-0 z-0">
+        <MapContainer 
+          style={{ height: '100%', width: '100%', borderRadius: '0.5rem' }}
+          className="leaflet-container"
+        >
+          <SetViewOnChange center={mapCenter} zoom={mapConfig.zoom} />
+          
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-        )}
-        
-        {filteredActivities.map((activity) => (
-          <Marker
-            key={activity.id}
-            position={[activity.location.lat, activity.location.lng] as [number, number]}
-            eventHandlers={{
-              click: () => handleMarkerClick(activity),
-            }}
-          >
-            <Popup>
-              <div className="p-1">
-                <h3 className="font-semibold text-lg">{activity.title}</h3>
-                <p className="text-sm text-gray-600">{activity.category.charAt(0).toUpperCase() + activity.category.slice(1)}</p>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
-      </MapContainer>
+          
+          {userLocation && (
+            <Circle
+              center={[userLocation.lat, userLocation.lng] as [number, number]}
+              pathOptions={{ 
+                fillColor: '#3B82F6', 
+                fillOpacity: 0.1, 
+                color: '#3B82F6', 
+                weight: 1 
+              }}
+              radius={mapConfig.radius * 1000 as any}
+            />
+          )}
+          
+          {filteredActivities.map((activity) => (
+            <Marker
+              key={activity.id}
+              position={[activity.location.lat, activity.location.lng] as [number, number]}
+              eventHandlers={{
+                click: () => handleMarkerClick(activity),
+              }}
+            >
+              <Popup>
+                <div className="p-1">
+                  <h3 className="font-semibold text-lg">{activity.title}</h3>
+                  <p className="text-sm text-gray-600">{activity.category.charAt(0).toUpperCase() + activity.category.slice(1)}</p>
+                </div>
+              </Popup>
+            </Marker>
+          ))}
+        </MapContainer>
+      </div>
     </div>
   );
 };
