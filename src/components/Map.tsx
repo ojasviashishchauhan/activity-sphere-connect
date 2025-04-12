@@ -31,6 +31,7 @@ const Map: React.FC = () => {
     setUserLocation,
     mapConfig,
     updateMapConfig,
+    hoveredActivityId
   } = useActivity();
 
   const defaultCenter: [number, number] = [37.7749, -122.4194];
@@ -55,7 +56,7 @@ const Map: React.FC = () => {
     }
   };
   
-  const handleMarkerClick = (activity: React.SetStateAction<import("@/types").Activity | null>) => {
+  const handleMarkerClick = (activity: Activity) => {
     selectActivity(activity);
   };
 
@@ -93,6 +94,7 @@ const Map: React.FC = () => {
             userLocation={userLocation} 
             radiusInKm={mapConfig.radius}
             onMarkerClick={handleMarkerClick}
+            hoveredActivityId={hoveredActivityId}
           />
         </MapContainer>
       </div>

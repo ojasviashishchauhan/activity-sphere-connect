@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { Activity } from '@/types';
 import { useActivity } from '@/context/ActivityContext';
@@ -17,7 +17,8 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, variant = 'defaul
   const { 
     selectActivity, 
     requestToJoinActivity,
-    selectedActivity
+    selectedActivity,
+    setHoveredActivityId
   } = useActivity();
   
   const isSelected = selectedActivity?.id === activity.id;
@@ -29,6 +30,14 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, variant = 'defaul
   const handleRequestJoin = (e: React.MouseEvent) => {
     e.stopPropagation();
     requestToJoinActivity(activity.id);
+  };
+
+  const handleMouseEnter = () => {
+    setHoveredActivityId(activity.id);
+  };
+
+  const handleMouseLeave = () => {
+    setHoveredActivityId(null);
   };
   
   const getAverageRating = () => {
@@ -46,6 +55,8 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, variant = 'defaul
       <Card 
         className={`cursor-pointer hover:shadow-md transition-shadow ${isSelected ? 'ring-2 ring-primary' : ''}`}
         onClick={handleClick}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
       >
         <CardContent className="p-4">
           <div className="flex items-start justify-between">
@@ -88,6 +99,8 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, variant = 'defaul
     <Card 
       className={`cursor-pointer hover:shadow-md transition-shadow ${isSelected ? 'ring-2 ring-primary' : ''}`}
       onClick={handleClick}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
