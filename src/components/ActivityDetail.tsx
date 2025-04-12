@@ -1,282 +1,166 @@
 
 import React, { useState } from 'react';
-import { format } from 'date-fns';
-import { Activity, ActivityRequest } from '@/types';
 import { useActivity } from '@/context/ActivityContext';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, Users, MapPin, X, Star, ChevronLeft } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import ReviewList from './ReviewList';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Textarea } from '@/components/ui/textarea';
-import { Form, FormField, FormItem, FormLabel, FormControl } from '@/components/ui/form';
-import { useForm } from 'react-hook-form';
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { formatDistanceToNow } from 'date-fns';
+import ReviewList from './ReviewList';
+import { Calendar, Clock, Users, MapPin, MessagesSquare, Star } from 'lucide-react';
 
 interface ActivityDetailProps {
   onClose: () => void;
 }
 
-interface JoinRequestForm {
-  note: string;
-}
-
 const ActivityDetail: React.FC<ActivityDetailProps> = ({ onClose }) => {
-  const [showJoinDialog, setShowJoinDialog] = useState(false);
-  const { 
-    selectedActivity, 
-    requestToJoinActivity,
-    approveActivityRequest,
-    rejectActivityRequest
-  } = useActivity();
+  const { selectedActivity: activity, requestToJoinActivity } = useActivity();
+  const [activeTab, setActiveTab] = useState('details');
+  const [joinNote, setJoinNote] = useState('');
+  const [isJoinRequested, setIsJoinRequested] = useState(false);
   
-  const form = useForm<JoinRequestForm>({
-    defaultValues: {
-      note: ''
-    }
-  });
+  if (!activity) {
+    return null;
+  }
   
-  if (!selectedActivity) return null;
-  
-  const isHost = selectedActivity.hostId === 'current-user';
-  const pending = selectedActivity.requests?.filter(request => request.status === 'pending') || [];
-  const approved = selectedActivity.requests?.filter(request => request.status === 'approved') || [];
-  const rejected = selectedActivity.requests?.filter(request => request.status === 'rejected') || [];
-  
-  const handleRequestJoin = (data: JoinRequestForm) => {
-    requestToJoinActivity(selectedActivity.id, data.note);
-    setShowJoinDialog(false);
-    form.reset();
+  const handleJoinRequest = () => {
+    requestToJoinActivity(activity.id, joinNote);
+    setIsJoinRequested(true);
   };
   
-  const handleApprove = (request: ActivityRequest) => {
-    approveActivityRequest(selectedActivity.id, request.id);
+  const getAvatarInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
   };
-  
-  const handleReject = (request: ActivityRequest) => {
-    rejectActivityRequest(selectedActivity.id, request.id);
-  };
-  
-  const isFull = selectedActivity.currentParticipants >= selectedActivity.capacity;
-  
+
   return (
     <div className="p-5 h-full overflow-y-auto">
-      <div className="flex items-center justify-between mb-4">
-        <Button variant="ghost" size="icon" onClick={onClose}>
-          <ChevronLeft className="w-5 h-5" />
-        </Button>
-        <Button variant="ghost" size="icon" onClick={onClose}>
-          <X className="w-5 h-5" />
-        </Button>
-      </div>
-      
-      <div className="space-y-6">
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <Badge className={`category-${selectedActivity.category}`}>
-              {selectedActivity.category}
-            </Badge>
-            {selectedActivity.reviews && selectedActivity.reviews.length > 0 && (
-              <div className="flex items-center">
-                <Star className="w-4 h-4 mr-1 text-yellow-500 fill-yellow-500" />
-                <span className="font-medium">
-                  {(selectedActivity.reviews.reduce((sum, review) => 
-                    sum + ((review.hostRating + review.activityRating) / 2), 0) / 
-                    selectedActivity.reviews.length).toFixed(1)}
-                </span>
-              </div>
-            )}
-          </div>
-          <h2 className="text-2xl font-bold">{selectedActivity.title}</h2>
-          <div className="flex items-center mt-2">
-            <img 
-              src={selectedActivity.hostImage} 
-              alt={selectedActivity.hostName}
-              className="w-6 h-6 rounded-full mr-2"
-            />
-            <span className="text-sm">Hosted by {selectedActivity.hostName}</span>
+      <div className="mb-4">
+        <h2 className="text-xl font-bold">{activity.title}</h2>
+        <div className="flex items-center mt-1">
+          <Badge variant="outline" className="capitalize mr-2">
+            {activity.category}
+          </Badge>
+          <span className="text-sm text-gray-500">
+            Posted {formatDistanceToNow(new Date(activity.createdAt), { addSuffix: true })}
+          </span>
+        </div>
+        <div className="flex items-center mt-4">
+          <Avatar className="h-10 w-10 mr-3">
+            <AvatarImage src={activity.hostImage} alt={activity.hostName} />
+            <AvatarFallback>{getAvatarInitials(activity.hostName)}</AvatarFallback>
+          </Avatar>
+          <div>
+            <p className="text-sm font-medium">Hosted by {activity.hostName}</p>
           </div>
         </div>
+      </div>
+      
+      <Tabs defaultValue="details" value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid grid-cols-3 mb-4">
+          <TabsTrigger value="details">Details</TabsTrigger>
+          <TabsTrigger value="participants">
+            Participants ({activity.currentParticipants}/{activity.capacity})
+          </TabsTrigger>
+          <TabsTrigger value="reviews">
+            Reviews ({(activity.reviews || []).length})
+          </TabsTrigger>
+        </TabsList>
         
-        <Tabs defaultValue="details" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="details">Details</TabsTrigger>
-            {isHost && <TabsTrigger value="requests">
-              Requests {pending.length > 0 && `(${pending.length})`}
-            </TabsTrigger>}
-          </TabsList>
-          
-          <TabsContent value="details" className="mt-6 space-y-6">
-            <div className="grid grid-cols-2 gap-y-4 text-sm">
-              <div className="flex items-center">
-                <Calendar className="w-5 h-5 mr-3 text-gray-500" />
-                <span>{format(new Date(selectedActivity.date), 'EEEE, MMMM d, yyyy')}</span>
-              </div>
-              <div className="flex items-center">
-                <Clock className="w-5 h-5 mr-3 text-gray-500" />
-                <span>{selectedActivity.time}</span>
-              </div>
-              <div className="flex items-center">
-                <Users className="w-5 h-5 mr-3 text-gray-500" />
-                <span>
-                  {selectedActivity.currentParticipants}/{selectedActivity.capacity} participants
-                  {isFull && <span className="ml-2 text-red-500">(Full)</span>}
-                </span>
-              </div>
-              <div className="flex items-center">
-                <MapPin className="w-5 h-5 mr-3 text-gray-500" />
-                <span>San Francisco</span>
-              </div>
-            </div>
-            
-            <div>
-              <h3 className="font-semibold mb-2">Description</h3>
-              <p className="text-gray-700">{selectedActivity.description}</p>
-            </div>
-            
-            <Separator />
-            
-            {!isHost && (
+        <TabsContent value="details" className="space-y-4">
+          <div className="bg-gray-50 p-4 rounded-lg space-y-3">
+            <div className="flex items-start gap-3">
+              <Calendar className="h-5 w-5 text-gray-500 mt-0.5" />
               <div>
-                <AlertDialog open={showJoinDialog} onOpenChange={setShowJoinDialog}>
-                  <AlertDialogTrigger asChild>
-                    <Button 
-                      className="w-full"
-                      disabled={isFull}
-                    >
-                      {isFull ? 'Activity Full' : 'Request to Join'}
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Request to Join {selectedActivity.title}</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Write a note to the host explaining why you want to join this activity.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <Form {...form}>
-                      <form onSubmit={form.handleSubmit(handleRequestJoin)} className="space-y-4">
-                        <FormField
-                          control={form.control}
-                          name="note"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Your note to the host</FormLabel>
-                              <FormControl>
-                                <Textarea 
-                                  placeholder="I'm interested in joining because..." 
-                                  {...field} 
-                                  className="min-h-[100px]"
-                                />
-                              </FormControl>
-                            </FormItem>
-                          )}
-                        />
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction type="submit">Send Request</AlertDialogAction>
-                        </AlertDialogFooter>
-                      </form>
-                    </Form>
-                  </AlertDialogContent>
-                </AlertDialog>
-                
-                <p className="text-sm text-gray-500 mt-2 text-center">
-                  You'll receive details once the host approves your request
+                <h3 className="font-medium">Date & Time</h3>
+                <p className="text-gray-600">
+                  {new Date(activity.date).toLocaleDateString()} at {activity.time}
                 </p>
               </div>
-            )}
+            </div>
             
-            {selectedActivity.reviews && selectedActivity.reviews.length > 0 && (
-              <>
-                <Separator />
-                <ReviewList reviews={selectedActivity.reviews} />
-              </>
-            )}
-          </TabsContent>
+            <div className="flex items-start gap-3">
+              <MapPin className="h-5 w-5 text-gray-500 mt-0.5" />
+              <div>
+                <h3 className="font-medium">Location</h3>
+                <p className="text-gray-600">
+                  {activity.location.address || `${activity.location.lat.toFixed(6)}, ${activity.location.lng.toFixed(6)}`}
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex items-start gap-3">
+              <Users className="h-5 w-5 text-gray-500 mt-0.5" />
+              <div>
+                <h3 className="font-medium">Capacity</h3>
+                <p className="text-gray-600">
+                  {activity.currentParticipants} out of {activity.capacity} spots filled
+                </p>
+              </div>
+            </div>
+          </div>
           
-          {isHost && (
-            <TabsContent value="requests" className="mt-6 space-y-6">
-              {pending.length > 0 ? (
-                <div>
-                  <h3 className="font-semibold mb-3">Pending Requests ({pending.length})</h3>
-                  <div className="space-y-3">
-                    {pending.map(request => (
-                      <div key={request.id} className="bg-gray-50 p-4 rounded-lg">
-                        <div className="flex items-center mb-2">
-                          <img 
-                            src={request.userImage}
-                            alt={request.userName}
-                            className="w-8 h-8 rounded-full mr-3"
-                          />
-                          <div>
-                            <div className="font-medium">{request.userName}</div>
-                            <div className="text-xs text-gray-500">
-                              {format(new Date(request.createdAt), 'MMM d, yyyy')}
-                            </div>
-                          </div>
-                        </div>
-                        
-                        {request.note && (
-                          <div className="bg-white p-3 rounded mb-3 text-sm">
-                            {request.note}
-                          </div>
-                        )}
-                        
-                        <div className="flex justify-end space-x-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleReject(request)}
-                          >
-                            Decline
-                          </Button>
-                          <Button 
-                            size="sm"
-                            onClick={() => handleApprove(request)}
-                          >
-                            Approve
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  No pending requests
-                </div>
-              )}
-              
-              {approved.length > 0 && (
-                <div>
-                  <h3 className="font-semibold mb-3">Approved Requests ({approved.length})</h3>
-                  <div className="space-y-3">
-                    {approved.map(request => (
-                      <div key={request.id} className="bg-gray-50 p-4 rounded-lg">
-                        <div className="flex items-center">
-                          <img 
-                            src={request.userImage}
-                            alt={request.userName}
-                            className="w-8 h-8 rounded-full mr-3"
-                          />
-                          <div>
-                            <div className="font-medium">{request.userName}</div>
-                            <div className="text-xs text-gray-500">
-                              Approved on {format(new Date(request.createdAt), 'MMM d, yyyy')}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </TabsContent>
+          <div>
+            <h3 className="font-medium mb-2">Description</h3>
+            <p className="text-gray-600 whitespace-pre-wrap">{activity.description}</p>
+          </div>
+          
+          {!isJoinRequested ? (
+            <div className="border-t pt-4 mt-4">
+              <h3 className="font-medium mb-2">Want to join?</h3>
+              <Textarea
+                placeholder="Add a note to the host (optional)"
+                className="mb-3"
+                value={joinNote}
+                onChange={(e) => setJoinNote(e.target.value)}
+              />
+              <Button className="w-full" onClick={handleJoinRequest}>
+                Request to Join
+              </Button>
+            </div>
+          ) : (
+            <div className="border-t pt-4 mt-4">
+              <div className="bg-green-50 p-3 rounded-md text-green-800 text-center">
+                Your request to join has been sent to the host!
+              </div>
+            </div>
           )}
-        </Tabs>
-      </div>
+        </TabsContent>
+        
+        <TabsContent value="participants">
+          <div className="space-y-2 mb-4">
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+              <div className="flex items-center gap-3">
+                <Avatar>
+                  <AvatarImage src={activity.hostImage} alt={activity.hostName} />
+                  <AvatarFallback>{getAvatarInitials(activity.hostName)}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-medium">{activity.hostName}</p>
+                  <p className="text-xs text-gray-500">Host</p>
+                </div>
+              </div>
+            </div>
+            
+            {/* We'd normally show all participants here */}
+            <p className="text-sm text-gray-500 text-center py-4">
+              {activity.currentParticipants > 1 
+                ? `Plus ${activity.currentParticipants - 1} other participants` 
+                : "No other participants yet"
+              }
+            </p>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="reviews">
+          <ReviewList reviews={activity.reviews || []} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

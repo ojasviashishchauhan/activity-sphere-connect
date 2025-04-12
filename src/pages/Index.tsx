@@ -5,16 +5,18 @@ import Map from '@/components/Map';
 import ActivityList from '@/components/ActivityList';
 import ActivityDetail from '@/components/ActivityDetail';
 import ActivityForm from '@/components/ActivityForm';
+import MyActivities from '@/components/MyActivities';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
-import { Menu, X, MapPin, ListFilter } from 'lucide-react';
+import { Menu, X, MapPin, ListFilter, UserCircle } from 'lucide-react';
 
 const Index = () => {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [view, setView] = useState<'list' | 'map'>('map');
   const [showDetail, setShowDetail] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showMyActivities, setShowMyActivities] = useState(false);
   
   const toggleMobileSidebar = () => {
     setIsMobileSidebarOpen(!isMobileSidebarOpen);
@@ -23,6 +25,13 @@ const Index = () => {
   const handleCreateActivity = () => {
     setShowCreateForm(true);
     setShowDetail(false);
+    setShowMyActivities(false);
+  };
+  
+  const handleShowMyActivities = () => {
+    setShowMyActivities(true);
+    setShowDetail(false);
+    setShowCreateForm(false);
   };
   
   const handleCloseDetail = () => {
@@ -31,6 +40,10 @@ const Index = () => {
   
   const handleCloseCreateForm = () => {
     setShowCreateForm(false);
+  };
+  
+  const handleCloseMyActivities = () => {
+    setShowMyActivities(false);
   };
   
   return (
@@ -60,8 +73,12 @@ const Index = () => {
             </Tabs>
           </div>
           
-          <div className="hidden lg:block">
-            <Button variant="outline" onClick={handleCreateActivity}>
+          <div className="hidden lg:flex gap-2">
+            <Button variant="outline" onClick={handleShowMyActivities}>
+              <UserCircle className="w-4 h-4 mr-2" />
+              My Activities
+            </Button>
+            <Button variant="default" onClick={handleCreateActivity}>
               Create Activity
             </Button>
           </div>
@@ -73,7 +90,10 @@ const Index = () => {
             {/* Mobile List View */}
             <div className={`lg:hidden ${view === 'list' ? 'flex-1' : 'hidden'}`}>
               <div className="h-full p-4">
-                <ActivityList onCreateActivity={handleCreateActivity} />
+                <ActivityList 
+                  onCreateActivity={handleCreateActivity}
+                  onShowMyActivities={handleShowMyActivities}
+                />
               </div>
             </div>
             
@@ -86,7 +106,10 @@ const Index = () => {
             
             {/* Desktop Layout */}
             <div className="hidden lg:flex lg:w-1/3 border-r p-4 overflow-y-auto">
-              <ActivityList onCreateActivity={handleCreateActivity} />
+              <ActivityList 
+                onCreateActivity={handleCreateActivity}
+                onShowMyActivities={handleShowMyActivities}
+              />
             </div>
             <div className="hidden lg:flex lg:w-2/3">
               <Map />
@@ -104,7 +127,10 @@ const Index = () => {
                   <X className="w-5 h-5" />
                 </Button>
               </div>
-              <ActivityList onCreateActivity={handleCreateActivity} />
+              <ActivityList 
+                onCreateActivity={handleCreateActivity}
+                onShowMyActivities={handleShowMyActivities}
+              />
             </div>
           </SheetContent>
         </Sheet>
@@ -120,6 +146,13 @@ const Index = () => {
         <Sheet open={showCreateForm} onOpenChange={setShowCreateForm}>
           <SheetContent side="right" className="p-0 w-[350px] sm:w-[450px] z-[60]">
             <ActivityForm onClose={handleCloseCreateForm} />
+          </SheetContent>
+        </Sheet>
+        
+        {/* My Activities Sheet */}
+        <Sheet open={showMyActivities} onOpenChange={setShowMyActivities}>
+          <SheetContent side="right" className="p-0 w-[350px] sm:w-[450px] z-[60]">
+            <MyActivities onClose={handleCloseMyActivities} />
           </SheetContent>
         </Sheet>
       </div>

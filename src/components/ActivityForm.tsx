@@ -34,21 +34,33 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ onClose }) => {
   const [searching, setSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<any[]>([]);
   
-  const handleAddressSearch = () => {
+  const handleAddressSearch = async () => {
     if (!addressInput.trim()) return;
     
     setSearching(true);
     
-    fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(addressInput)}.json?access_token=${mapboxgl.accessToken}&limit=5`)
-      .then(response => response.json())
-      .then(data => {
-        setSearchResults(data.features || []);
-        setSearching(false);
-      })
-      .catch(error => {
-        console.error('Error searching address:', error);
-        setSearching(false);
-      });
+    try {
+      // Use OpenStreetMap Nominatim for geocoding since it doesn't require API key
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addressInput)}&limit=5`);
+      const data = await response.json();
+      
+      if (data && data.length > 0) {
+        // Format results to match our expected format
+        const formattedResults = data.map((item: any) => ({
+          id: item.place_id,
+          place_name: item.display_name,
+          center: [parseFloat(item.lon), parseFloat(item.lat)]
+        }));
+        
+        setSearchResults(formattedResults);
+      } else {
+        setSearchResults([]);
+      }
+    } catch (error) {
+      console.error('Error searching address:', error);
+    } finally {
+      setSearching(false);
+    }
   };
   
   const handleSelectLocation = (feature: any) => {
@@ -100,8 +112,11 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ onClose }) => {
         
         <div>
           <label className="block font-medium mb-1">Category*</label>
-          <Select value={category} onValueChange={value => setCategory(value as ActivityCategory)}>
-            <SelectTrigger>
+          <Select 
+            value={category} 
+            onValueChange={(value: string) => setCategory(value as ActivityCategory)}
+          >
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="Select a category" />
             </SelectTrigger>
             <SelectContent>

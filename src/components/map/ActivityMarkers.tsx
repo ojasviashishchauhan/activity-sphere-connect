@@ -74,7 +74,7 @@ const ActivityMarkers: React.FC<ActivityMarkersProps> = ({
             color: '#3B82F6', 
             weight: 1 
           }}
-          // Update the radius property to match expected type
+          // Use the correct Circle prop format
           radius={radiusInKm * 1000}
         />
       )}
@@ -88,11 +88,12 @@ const ActivityMarkers: React.FC<ActivityMarkersProps> = ({
           <Marker
             key={activity.id}
             position={[activity.location.lat, activity.location.lng]}
-            icon={markerIcon}
+            // Use the correct Marker prop format
             eventHandlers={{
               click: () => onMarkerClick(activity)
             }}
             zIndexOffset={isHovered ? 1000 : 0}
+            icon={markerIcon}
           >
             <Popup>
               <div className="p-1">
