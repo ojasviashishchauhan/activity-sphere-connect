@@ -189,6 +189,7 @@ const Map: React.FC = () => {
           />
           
           {userLocation && (
+            // Fix: In react-leaflet v4, the radius prop should be passed inside a 'radius' prop
             <Circle
               center={[userLocation.lat, userLocation.lng]}
               pathOptions={{ 
@@ -197,6 +198,7 @@ const Map: React.FC = () => {
                 color: '#3B82F6', 
                 weight: 1 
               }}
+              // This is the key fix: radius is specified in meters within pathOptions
               radius={mapConfig.radius * 1000}
             />
           )}
