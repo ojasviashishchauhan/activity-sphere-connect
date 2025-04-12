@@ -2,17 +2,19 @@
 import React, { useEffect } from 'react';
 import { useMap } from 'react-leaflet';
 
-interface SetViewOnChangeProps {
+interface MapViewHandlerProps {
   center: [number, number];
   zoom: number;
 }
 
-const MapViewHandler: React.FC<SetViewOnChangeProps> = ({ center, zoom }) => {
+const MapViewHandler: React.FC<MapViewHandlerProps> = ({ center, zoom }) => {
   const map = useMap();
   
   useEffect(() => {
-    map.setView(center, zoom);
-  }, [center, zoom, map]);
+    if (map) {
+      map.setView(center, zoom);
+    }
+  }, [map, center, zoom]);
   
   return null;
 };

@@ -12,8 +12,8 @@ import ActivityMarkers from './map/ActivityMarkers';
 
 // Set up Leaflet default icon
 let DefaultIcon = L.icon({
-  iconUrl: 'leaflet/dist/images/marker-icon.png',
-  shadowUrl: 'leaflet/dist/images/marker-shadow.png',
+  iconUrl: '/leaflet/dist/images/marker-icon.png',
+  shadowUrl: '/leaflet/dist/images/marker-shadow.png',
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
