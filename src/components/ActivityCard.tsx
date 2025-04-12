@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { format } from 'date-fns';
 import { Activity } from '@/types';
 import { useActivity } from '@/context/ActivityContext';

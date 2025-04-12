@@ -4,6 +4,7 @@ import { MapContainer, TileLayer } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useActivity } from '@/context/ActivityContext';
+import { Activity } from '@/types';
 import MapViewHandler from './map/MapViewHandler';
 import MapTopBar from './map/MapTopBar';
 import MapControls from './map/MapControls';

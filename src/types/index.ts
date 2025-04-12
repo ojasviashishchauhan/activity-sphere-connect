@@ -21,6 +21,7 @@ export interface ActivityRequest {
   createdAt: Date;
   userName: string;
   userImage: string;
+  note?: string;
 }
 
 export interface Review {

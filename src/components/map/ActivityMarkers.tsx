@@ -3,15 +3,6 @@ import React from 'react';
 import { Marker, Popup, Circle } from 'react-leaflet';
 import L from 'leaflet';
 import { Activity, Location } from '@/types';
-import { 
-  Music, 
-  Dumbbell, 
-  Paintbrush, 
-  Scroll, 
-  Mountain, 
-  Utensils, 
-  Sparkles 
-} from 'lucide-react';
 
 interface ActivityMarkersProps {
   activities: Activity[];
@@ -79,25 +70,28 @@ const ActivityMarkers: React.FC<ActivityMarkersProps> = ({
     <>
       {userLocation && (
         <Circle
-          center={[userLocation.lat, userLocation.lng]} 
+          center={[userLocation.lat, userLocation.lng]}
           pathOptions={{ 
             fillColor: '#3B82F6', 
             fillOpacity: 0.1, 
             color: '#3B82F6', 
             weight: 1 
           }}
-          // Convert km to meters for the Circle component
-          radius={radiusInKm * 1000} 
+          // We need to multiply by 1000 to convert km to meters
+          radius={radiusInKm * 1000}
         />
       )}
       
       {activities.map((activity) => {
         const isHovered = hoveredActivityId === activity.id;
+        // Use L.DivIcon for the marker
+        const icon = getActivityIcon(activity.category, isHovered);
+        
         return (
           <Marker
             key={activity.id}
             position={[activity.location.lat, activity.location.lng]}
-            icon={getActivityIcon(activity.category, isHovered)}
+            icon={icon}
             eventHandlers={{
               click: () => onMarkerClick(activity)
             }}

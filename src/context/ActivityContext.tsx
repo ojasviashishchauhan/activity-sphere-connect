@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Activity, ActivityCategory, Location, ActivityRequest, Review, MapConfig } from '@/types';
 import { activities as mockActivities, requests as mockRequests, reviews as mockReviews } from '@/data/mockData';
@@ -19,15 +18,17 @@ interface ActivityContextType {
   mapConfig: MapConfig;
   categoryFilter: ActivityCategory | 'all';
   searchQuery: string;
+  hoveredActivityId: string | null;
   
   selectActivity: (activity: Activity | null) => void;
   setUserLocation: (location: Location | null) => void;
   updateMapConfig: (config: Partial<MapConfig>) => void;
   setCategoryFilter: (category: ActivityCategory | 'all') => void;
   setSearchQuery: (query: string) => void;
+  setHoveredActivityId: (id: string | null) => void;
   
   createActivity: (activity: Partial<Activity>) => void;
-  requestToJoinActivity: (activityId: string) => void;
+  requestToJoinActivity: (activityId: string, note?: string) => void;
   approveActivityRequest: (activityId: string, requestId: string) => void;
   rejectActivityRequest: (activityId: string, requestId: string) => void;
   submitActivityReview: (review: Partial<Review>) => void;
@@ -43,6 +44,7 @@ export const ActivityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [mapConfig, setMapConfig] = useState<MapConfig>(DEFAULT_MAP_CONFIG);
   const [categoryFilter, setCategoryFilter] = useState<ActivityCategory | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [hoveredActivityId, setHoveredActivityId] = useState<string | null>(null);
   
   const { toast } = useToast();
 
@@ -133,7 +135,7 @@ export const ActivityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     });
   };
 
-  const requestToJoinActivity = (activityId: string) => {
+  const requestToJoinActivity = (activityId: string, note?: string) => {
     const newRequest: ActivityRequest = {
       id: `request-${Date.now()}`,
       userId: 'current-user',
@@ -142,6 +144,7 @@ export const ActivityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       createdAt: new Date(),
       userName: 'Current User',
       userImage: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1760&q=80',
+      note: note || ''
     };
     
     setActivities(prev => 
@@ -241,12 +244,14 @@ export const ActivityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         mapConfig,
         categoryFilter,
         searchQuery,
+        hoveredActivityId,
         
         selectActivity,
         setUserLocation,
         updateMapConfig,
         setCategoryFilter,
         setSearchQuery,
+        setHoveredActivityId,
         
         createActivity,
         requestToJoinActivity,
