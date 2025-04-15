@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useActivity } from '@/context/ActivityContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,7 +12,6 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { ActivityCategory, Location } from '@/types';
-import mapboxgl from 'mapbox-gl';
 import { Calendar, Clock, Users, MapPin } from 'lucide-react';
 
 interface ActivityFormProps {
@@ -34,6 +33,12 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ onClose }) => {
   const [searching, setSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<any[]>([]);
   
+  useEffect(() => {
+    if (userLocation) {
+      setLocation(userLocation);
+    }
+  }, [userLocation]);
+
   const handleAddressSearch = async () => {
     if (!addressInput.trim()) return;
     
@@ -114,12 +119,12 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ onClose }) => {
           <label className="block font-medium mb-1">Category*</label>
           <Select 
             value={category} 
-            onValueChange={(value: string) => setCategory(value as ActivityCategory)}
+            onValueChange={(value) => setCategory(value as ActivityCategory)}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select a category" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent position="item-aligned" className="z-50">
               <SelectItem value="sports">Sports</SelectItem>
               <SelectItem value="arts">Arts</SelectItem>
               <SelectItem value="education">Education</SelectItem>
@@ -210,7 +215,7 @@ const ActivityForm: React.FC<ActivityFormProps> = ({ onClose }) => {
           </div>
           
           {searchResults.length > 0 && (
-            <div className="mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto z-10">
+            <div className="mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto z-50">
               {searchResults.map(feature => (
                 <div 
                   key={feature.id} 

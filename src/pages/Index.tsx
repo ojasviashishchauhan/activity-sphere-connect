@@ -50,7 +50,7 @@ const Index = () => {
     <ActivityProvider>
       <div className="h-screen flex flex-col">
         {/* Header */}
-        <header className="bg-white border-b sticky top-0 z-[50] px-4 py-3 flex items-center justify-between">
+        <header className="bg-white border-b sticky top-0 z-50 px-4 py-3 flex items-center justify-between">
           <div className="flex items-center">
             <Button variant="ghost" size="icon" className="lg:hidden mr-2" onClick={toggleMobileSidebar}>
               <Menu className="w-5 h-5" />
@@ -119,7 +119,7 @@ const Index = () => {
         
         {/* Mobile Sidebar */}
         <Sheet open={isMobileSidebarOpen} onOpenChange={setIsMobileSidebarOpen}>
-          <SheetContent side="left" className="p-0 w-[300px] sm:w-[350px] z-[60]">
+          <SheetContent side="left" className="p-0 w-[300px] sm:w-[350px] z-60">
             <div className="h-full p-4">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold">Filters</h2>
@@ -137,21 +137,21 @@ const Index = () => {
         
         {/* Activity Detail Sheet */}
         <Sheet open={showDetail} onOpenChange={setShowDetail}>
-          <SheetContent side="right" className="p-0 w-[350px] sm:w-[450px] z-[60]">
+          <SheetContent side="right" className="p-0 w-[350px] sm:w-[450px] z-60">
             <ActivityDetail onClose={handleCloseDetail} />
           </SheetContent>
         </Sheet>
         
         {/* Create Activity Sheet */}
         <Sheet open={showCreateForm} onOpenChange={setShowCreateForm}>
-          <SheetContent side="right" className="p-0 w-[350px] sm:w-[450px] z-[60]">
+          <SheetContent side="right" className="p-0 w-[350px] sm:w-[450px] z-60">
             <ActivityForm onClose={handleCloseCreateForm} />
           </SheetContent>
         </Sheet>
         
         {/* My Activities Sheet */}
         <Sheet open={showMyActivities} onOpenChange={setShowMyActivities}>
-          <SheetContent side="right" className="p-0 w-[350px] sm:w-[450px] z-[60]">
+          <SheetContent side="right" className="p-0 w-[350px] sm:w-[450px] z-60">
             <MyActivities onClose={handleCloseMyActivities} />
           </SheetContent>
         </Sheet>

@@ -12,8 +12,8 @@ import ActivityMarkers from './map/ActivityMarkers';
 
 // Set up Leaflet default icon
 let DefaultIcon = L.icon({
-  iconUrl: '/leaflet/dist/images/marker-icon.png',
-  shadowUrl: '/leaflet/dist/images/marker-shadow.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
@@ -83,6 +83,8 @@ const Map: React.FC = () => {
         <MapContainer 
           style={{ height: '100%', width: '100%', borderRadius: '0.5rem' }}
           className="leaflet-container"
+          center={mapCenter}
+          zoom={mapConfig.zoom}
         >
           <MapViewHandler center={mapCenter} zoom={mapConfig.zoom} />
           

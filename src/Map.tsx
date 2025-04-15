@@ -96,12 +96,12 @@ const Map: React.FC = () => {
         getUserLocation={getUserLocation} 
       />
       
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 z-5">
         <MapContainer 
           style={{ height: '100%', width: '100%', borderRadius: '0.5rem' }}
           className="leaflet-container"
-          zoom={mapConfig.zoom}
           center={mapCenter}
+          zoom={mapConfig.zoom}
         >
           <MapViewHandler center={mapCenter} zoom={mapConfig.zoom} />
           
