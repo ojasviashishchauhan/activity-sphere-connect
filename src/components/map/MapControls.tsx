@@ -20,7 +20,7 @@ const MapControls: React.FC<MapControlsProps> = ({
   };
 
   return (
-    <div className="absolute right-4 top-20 z-30 flex flex-col space-y-2">
+    <div className="absolute right-4 top-20 z-50 flex flex-col space-y-2">
       <div className="flex flex-col space-y-1 bg-white/80 backdrop-blur-sm rounded-md shadow">
         <Button variant="ghost" size="icon" onClick={() => adjustZoom(1)} className="rounded-b-none">
           <Plus className="h-4 w-4" />
@@ -36,7 +36,7 @@ const MapControls: React.FC<MapControlsProps> = ({
         onClick={getUserLocation} 
         className="rounded-full shadow-md"
       >
-        <Navigation className="h-4 w-4" />
+        <Navigation className="w-4 h-4" />
       </Button>
     </div>
   );

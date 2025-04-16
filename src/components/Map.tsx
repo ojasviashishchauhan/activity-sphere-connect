@@ -83,8 +83,8 @@ const Map: React.FC = () => {
         <MapContainer 
           style={{ height: '100%', width: '100%', borderRadius: '0.5rem' }}
           className="leaflet-container"
-          center={mapCenter}
           zoom={mapConfig.zoom}
+          center={defaultCenter}
         >
           <MapViewHandler center={mapCenter} zoom={mapConfig.zoom} />
           
