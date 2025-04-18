@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ActivityProvider } from '@/context/ActivityContext';
 import Map from '@/components/Map';
@@ -6,10 +5,9 @@ import ActivityList from '@/components/ActivityList';
 import ActivityDetail from '@/components/ActivityDetail';
 import ActivityForm from '@/components/ActivityForm';
 import MyActivities from '@/components/MyActivities';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
-import { Menu, X, MapPin, ListFilter, UserCircle } from 'lucide-react';
+import { Plus, MapPin, ListFilter, UserCircle } from 'lucide-react';
 
 const Index = () => {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -48,46 +46,65 @@ const Index = () => {
   
   return (
     <ActivityProvider>
-      <div className="h-screen flex flex-col">
-        {/* Header */}
-        <header className="bg-white border-b sticky top-0 z-50 px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center">
-            <Button variant="ghost" size="icon" className="lg:hidden mr-2" onClick={toggleMobileSidebar}>
-              <Menu className="w-5 h-5" />
-            </Button>
-            <h1 className="text-xl font-bold text-primary">ActivitySphere</h1>
-          </div>
-          
-          <div className="lg:hidden flex">
-            <Tabs value={view} onValueChange={(v) => setView(v as 'list' | 'map')}>
-              <TabsList className="grid grid-cols-2 h-9">
-                <TabsTrigger value="map" className="flex items-center gap-1">
-                  <MapPin className="w-4 h-4" />
-                  <span className="sr-only sm:not-sr-only">Map</span>
-                </TabsTrigger>
-                <TabsTrigger value="list" className="flex items-center gap-1">
-                  <ListFilter className="w-4 h-4" />
-                  <span className="sr-only sm:not-sr-only">List</span>
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-          
-          <div className="hidden lg:flex gap-2">
-            <Button variant="outline" onClick={handleShowMyActivities}>
-              <UserCircle className="w-4 h-4 mr-2" />
-              My Activities
-            </Button>
-            <Button variant="default" onClick={handleCreateActivity}>
-              Create Activity
-            </Button>
+      <div className="h-screen flex flex-col bg-[#F6F6F7]">
+        <header className="bg-white/70 backdrop-blur-md border-b border-gray-200/50 sticky top-0 z-50 px-4 py-3">
+          <div className="flex items-center justify-between max-w-screen-xl mx-auto">
+            <h1 className="text-xl font-semibold text-[#1A1F2C]">ActivitySphere</h1>
+            
+            <div className="lg:hidden flex">
+              <div className="flex gap-2 bg-[#F1F0FB] p-1 rounded-full">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setView('map')}
+                  className={`rounded-full px-4 ${
+                    view === 'map'
+                      ? 'bg-white shadow-sm text-[#1A1F2C]'
+                      : 'text-gray-600'
+                  }`}
+                >
+                  <MapPin className="w-4 h-4 mr-2" />
+                  Map
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setView('list')}
+                  className={`rounded-full px-4 ${
+                    view === 'list'
+                      ? 'bg-white shadow-sm text-[#1A1F2C]'
+                      : 'text-gray-600'
+                  }`}
+                >
+                  <ListFilter className="w-4 h-4 mr-2" />
+                  List
+                </Button>
+              </div>
+            </div>
+            
+            <div className="hidden lg:flex gap-2">
+              <Button 
+                variant="outline" 
+                onClick={handleShowMyActivities}
+                className="rounded-full bg-white/80 backdrop-blur-sm border-gray-200/50 shadow-sm"
+              >
+                <UserCircle className="w-4 h-4 mr-2" />
+                My Activities
+              </Button>
+              <Button 
+                variant="default" 
+                onClick={handleCreateActivity}
+                className="rounded-full bg-[#9b87f5] hover:bg-[#7E69AB] text-white shadow-sm"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create
+              </Button>
+            </div>
           </div>
         </header>
         
-        {/* Main Content */}
         <main className="flex-1 overflow-hidden">
           <div className="h-full flex flex-col lg:flex-row">
-            {/* Mobile List View */}
             <div className={`lg:hidden ${view === 'list' ? 'flex-1' : 'hidden'}`}>
               <div className="h-full p-4">
                 <ActivityList 
@@ -97,15 +114,13 @@ const Index = () => {
               </div>
             </div>
             
-            {/* Mobile Map View */}
             <div className={`lg:hidden ${view === 'map' ? 'flex-1' : 'hidden'}`}>
               <div className="h-full">
                 <Map />
               </div>
             </div>
             
-            {/* Desktop Layout */}
-            <div className="hidden lg:flex lg:w-1/3 border-r p-4 overflow-y-auto">
+            <div className="hidden lg:flex lg:w-1/3 border-r border-gray-200/50 bg-white/80 backdrop-blur-md p-4 overflow-y-auto">
               <ActivityList 
                 onCreateActivity={handleCreateActivity}
                 onShowMyActivities={handleShowMyActivities}
@@ -117,14 +132,18 @@ const Index = () => {
           </div>
         </main>
         
-        {/* Mobile Sidebar */}
         <Sheet open={isMobileSidebarOpen} onOpenChange={setIsMobileSidebarOpen}>
-          <SheetContent side="left" className="p-0 w-[300px] sm:w-[350px] z-60">
+          <SheetContent side="left" className="p-0 w-[300px] sm:w-[350px] z-60 bg-white/80 backdrop-blur-md">
             <div className="h-full p-4">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold">Filters</h2>
-                <Button variant="ghost" size="icon" onClick={toggleMobileSidebar}>
-                  <X className="w-5 h-5" />
+                <h2 className="text-xl font-semibold text-[#1A1F2C]">Filters</h2>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={toggleMobileSidebar}
+                  className="rounded-full"
+                >
+                  Done
                 </Button>
               </div>
               <ActivityList 
@@ -135,23 +154,29 @@ const Index = () => {
           </SheetContent>
         </Sheet>
         
-        {/* Activity Detail Sheet */}
         <Sheet open={showDetail} onOpenChange={setShowDetail}>
-          <SheetContent side="right" className="p-0 w-[350px] sm:w-[450px] z-60">
+          <SheetContent 
+            side="bottom" 
+            className="p-0 h-[90vh] rounded-t-xl bg-white/80 backdrop-blur-md"
+          >
             <ActivityDetail onClose={handleCloseDetail} />
           </SheetContent>
         </Sheet>
         
-        {/* Create Activity Sheet */}
         <Sheet open={showCreateForm} onOpenChange={setShowCreateForm}>
-          <SheetContent side="right" className="p-0 w-[350px] sm:w-[450px] z-60">
+          <SheetContent 
+            side="bottom" 
+            className="p-0 h-[90vh] rounded-t-xl bg-white/80 backdrop-blur-md"
+          >
             <ActivityForm onClose={handleCloseCreateForm} />
           </SheetContent>
         </Sheet>
         
-        {/* My Activities Sheet */}
         <Sheet open={showMyActivities} onOpenChange={setShowMyActivities}>
-          <SheetContent side="right" className="p-0 w-[350px] sm:w-[450px] z-60">
+          <SheetContent 
+            side="bottom" 
+            className="p-0 h-[90vh] rounded-t-xl bg-white/80 backdrop-blur-md"
+          >
             <MyActivities onClose={handleCloseMyActivities} />
           </SheetContent>
         </Sheet>
