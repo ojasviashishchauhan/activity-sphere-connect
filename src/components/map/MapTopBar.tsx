@@ -23,7 +23,7 @@ const MapTopBar: React.FC<MapTopBarProps> = ({
   };
 
   return (
-    <div className="absolute top-4 left-4 right-4 z-40 flex flex-col space-y-2">
+    <div className="absolute top-4 left-4 right-4 z-[90] flex flex-col space-y-2">
       <div className="flex items-center justify-between">
         <MapSearch setUserLocation={setUserLocation} />
         
@@ -33,7 +33,7 @@ const MapTopBar: React.FC<MapTopBarProps> = ({
               <span className="font-medium">{mapConfig.radius} km</span>
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-[200px] p-4 z-50">
+          <PopoverContent className="w-[200px] p-4 z-[100]">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Search Radius</span>

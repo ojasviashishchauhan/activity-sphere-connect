@@ -126,16 +126,18 @@ const ActivityMarkers: React.FC<ActivityMarkersProps> = ({
         }
       });
       
-      // Add new circle
+      // Add new circle using the Leaflet API directly
+      const circleOptions = {
+        radius: radiusInKm * 1000,
+        fillColor: '#3B82F6',
+        fillOpacity: 0.1,
+        color: '#3B82F6',
+        weight: 1
+      };
+      
       const circle = L.circle(
         [userLocation.lat, userLocation.lng],
-        {
-          radius: radiusInKm * 1000,
-          fillColor: '#3B82F6',
-          fillOpacity: 0.1,
-          color: '#3B82F6',
-          weight: 1
-        }
+        circleOptions
       ).addTo(map);
       
       return () => {
